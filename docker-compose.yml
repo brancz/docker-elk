@@ -1,0 +1,25 @@
+web:
+  image: flowerpot/goif
+  ports:
+    - "8080:8080"
+fluentd:
+  build: ./fluentd
+  volumes:
+    - /var/lib/docker/containers:/var/lib/docker/containers
+  ports:
+    - "5140:5140/udp"
+  links:
+    - es
+es:
+  image: elasticsearch
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+kibana:
+  image: balsamiq/docker-kibana
+  ports:
+    - "80:80"
+  links:
+    - es
+  environment:
+    - KIBANA_SECURE=false
