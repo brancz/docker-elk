@@ -1,25 +1,40 @@
-web:
-  image: flowerpot/goif
-  ports:
-    - "8080:8080"
-fluentd:
-  build: ./fluentd
+elasticsearchdata:
+  image: 'alpine'
+  command: '/bin/true'
   volumes:
-    - /var/lib/docker/containers:/var/lib/docker/containers
+    - '/data/elasticsearch:/usr/share/elasticsearch/data'
+
+elasticsearch:
+  image: 'elasticsearch:1.6'
   ports:
-    - "5140:5140/udp"
+    - '9200:9200'
+  volumes_from:
+    - 'elasticsearchdata'
+
+logstash:
+  image: 'logstash'
+  command: 'logstash -e ''input { syslog { port => 12345 type => "docker" } } output { elasticsearch { host => "elasticsearch" } }'''
+  expose:
+    - '12345/tcp'
+    - '12345/udp'
   links:
-    - es
-es:
-  image: elasticsearch
-  ports:
-    - "9200:9200"
-    - "9300:9300"
+    - elasticsearch
+
+logspout:
+  image: 'gliderlabs/logspout'
+  entrypoint: '/bin/sh'
+  command: '-c ''/bin/logspout syslog://$LOGSTASH_PORT_12345_UDP_ADDR:12345'''
+  #deployment_strategy: every_node
+  volumes:
+    - '/var/run/docker.sock:/tmp/docker.sock'
+  links:
+    - logstash
+
 kibana:
-  image: balsamiq/docker-kibana
-  ports:
-    - "80:80"
-  links:
-    - es
+  image: marcbachmann/kibana4
   environment:
-    - KIBANA_SECURE=false
+    - ELASTICSEARCH=http://elasticsearch:9200
+  ports:
+    - '5601:5601'
+  links:
+    - elasticsearch
