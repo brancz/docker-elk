@@ -13,7 +13,7 @@ elasticsearch:
 
 logstash:
   image: 'logstash'
-  command: 'logstash -e ''input { syslog { port => 12345 type => "docker" } } output { elasticsearch { host => "elasticsearch" } }'''
+  command: 'logstash -e ''input { syslog { port => 12345 type => "docker" } } output { elasticsearch { host => "elasticsearch" } } filter { kv {} }'''
   expose:
     - '12345/tcp'
     - '12345/udp'
