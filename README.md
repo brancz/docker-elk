@@ -21,11 +21,6 @@ Simply start using it with:
 > Hint: this `docker-compose.yml` also works perfectly on
 > [rancher](rancher.com) :wink:
 
-TODO
-----
-
-Authentication for accessing Kibana as well as pushing logs into Logstash!
-
 Capture Docker Logs
 -------------------
 
